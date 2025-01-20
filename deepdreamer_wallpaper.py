@@ -1,8 +1,8 @@
 #! /usr/bin/python3
 
-# packages needed: apt install  python3-urllib3  python3-bs4  python3-pil
+# (c) 2025, Matthias Meier, licenced under Apache V2
 
-# s.a. ~/Unterricht/LinuxLab-wlw/glal3_V4_station_list_from_www.listenlive.eu.py
+# packages needed: apt install  python3-urllib3  python3-bs4  python3-pil
 
 import urllib.request
 from bs4 import BeautifulSoup
@@ -11,13 +11,13 @@ from PIL import Image, ImageFont, ImageDraw
 import os, time, re
 
 URL = 'https://deepdreamgenerator.com/'   # trending
-URL = 'https://deepdreamgenerator.com/latest'
+#URL = 'https://deepdreamgenerator.com/latest'
 
-RECYCLE_TIME = 10
+RECYCLE_TIME = 60
+SCALING = 'scaled' # 'scaled' shows whole picture wheras 'zoom' fills screen with cropped picture
 TITLE_YPOS = 0.95
 FONT_SIZE = 1/100   # of screen width
 IMG_FILE = '/tmp/deepdream.jpg'
-SCALING = 'scaled' # 'scaled' shows whole picture wheras 'zoom' fills screen with cropped picture
 
 os.system(f'gsettings set org.gnome.desktop.background picture-options {SCALING}')
 screen = re.findall(r' *(\d*)x(\d*)', os.popen("xrandr | grep '*'").read())[0]
@@ -40,6 +40,11 @@ while True:
             image['autor'] = item.find('li', attrs={'class':"name"}).text.strip()
             images.append(image)
 
+    if not images:
+        print(f'Site {URL} not reachable or html structure changed!')
+        time.sleep(RECYCLE_TIME)
+        continue
+
     for img in images:
         print(f"autor:'{img['autor']}'  title:'{img['title']}'  src:'{img['src']}'")
 
@@ -58,5 +63,3 @@ while True:
 
         os.system(f'gsettings set org.gnome.desktop.background picture-uri {IMG_FILE}')
         time.sleep(RECYCLE_TIME)
-
-    time.sleep(RECYCLE_TIME)
